@@ -1,6 +1,6 @@
-# Ansible : Playbook Kubernetes
+# Ansible : Playbook Portus
 
-The aim of this project is to deploy a Kubernetes cluster on Vagrant instances.
+The aim of this project is to deploy Portus on Vagrant instances.
 
 ## Getting Started
 
@@ -27,7 +27,7 @@ Be aware that you need to be in the Vagrant directory to be able to run the comm
 
 #### Deployment
 
-To deploy Kubernetes on Vagrant instances, just run this command :
+To deploy Portus on Vagrant instances, just run this command :
 
 ```bash
 $ vagrant up
@@ -40,24 +40,10 @@ $ vagrant status
 
 Current machine states:
 
-kubernetes01                   running (virtualbox)
-kubernetes02                   running (virtualbox)
-kubernetes03                   running (virtualbox)
+portus01                   running (virtualbox)
 ```
 
-If everything run as expected, you should list the active nodes with this command:
-
-```bash
-$ kubectl get node
-NAME           STATUS    ROLES     AGE       VERSION
-kubernetes01   Ready     master    2h        v1.12.2
-kubernetes02   Ready     <none>    2h        v1.12.2
-kubernetes03   Ready     <none>    2h        v1.12.2
-```
-
-For information, Flannel CNI is deployed by default to manage the Kubernetes networks.
-
-The dashboard is deployed by default but the UI access and the autentication is not managed yet.
+If everything run as expected, you should access Portus web interface : http://10.0.6.11:3000/
 
 #### Destroy
 
@@ -73,15 +59,15 @@ This section list some simple command to use and manage the playbook and the Vag
 
 #### Update with Ansible
 
-To update the Kubernetes cluster configuration with Ansible, you just have to run the Ansible playbook kubernetes.yml with this command :
+To update the Portus configuration with Ansible, you just have to run the Ansible playbook portus.yml with this command :
 
 ```bash
-$ ansible-playbook kubernetes.yml
+$ ansible-playbook portus.yml
 ```
 
 #### Update with Vagrant
 
-To update the Kubernetes cluster configuration with Vagrant, you just have to run provisioning part of the Vagrant file :
+To update the Portus configuration with Vagrant, you just have to run provisioning part of the Vagrant file :
 
 ```bash
 $ vagrant provision
@@ -92,7 +78,7 @@ $ vagrant provision
 To be able to connect to a Vagrant instance, you should use the CLI which is configured to automatically use the default SSH key :
 
 ```bash
-$ vagrant ssh kubernetes01
+$ vagrant ssh portus01
 ```
 
 ## Author
