@@ -1,0 +1,11 @@
+---
+
+- name: PORTUS | Download sources
+  git:
+    repo: "{{ portus_git_repository }}"
+    dest: "{{ portus_home }}"
+    version: 2.4.0
+    update: no
+
+- name: PORTUS | Deploy on Docker environment
+  import_tasks: docker.yml

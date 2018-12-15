@@ -1,0 +1,82 @@
+---
+
+- name: PORTUS DOCKER | Manage database
+  docker_container:
+    command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci --init-connect='SET NAMES UTF8;' --innodb-flush-log-at-trx-commit=0
+    env:
+      MYSQL_DATABASE: "{{ portus_db_name }}"
+      MYSQL_ROOT_PASSWORD: "{{ portus_db_password }}"
+    image: library/mariadb:10.0.23
+    name: db
+    volumes:
+      - /var/lib/portus/mariadb:/var/lib/mysql
+
+- name: PORTUS DOCKER | Manage Portus
+  docker_container:
+    command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci --init-connect='SET NAMES UTF8;' --innodb-flush-log-at-trx-commit=0
+    env:
+      PORTUS_MACHINE_FQDN_VALUE: "{{ portus_machine_fqdn_value }}"
+      PORTUS_DB_HOST: db
+      PORTUS_DB_DATABASE: portus_production
+      PORTUS_DB_PASSWORD: "{{ portus_db_password }}"
+      PORTUS_DB_POOL: 5
+      PORTUS_SECRET_KEY_BASE: "{{ portus_secret_key_base }}"
+      PORTUS_KEY_PATH: /certificates/portus.key
+      PORTUS_PASSWORD: "{{ portus_password }}"
+      PORTUS_CHECK_SSL_USAGE_ENABLED: 'false'
+      RAILS_SERVE_STATIC_FILES: 'true'
+    image: opensuse/portus:head
+    links:
+      - db
+    name: portus
+    ports:
+      - "3000:3000"
+    volumes:
+      - "{{ portus_home }}/examples/compose/secrets:/certificates:ro"
+
+
+- name: PORTUS DOCKER | Manage background
+  docker_container:
+    command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci --init-connect='SET NAMES UTF8;' --innodb-flush-log-at-trx-commit=0
+    env:
+      CCONFIG_PREFIX: PORTUS
+      PORTUS_MACHINE_FQDN_VALUE: "{{ portus_machine_fqdn_value }}"
+      PORTUS_DB_HOST: db
+      PORTUS_DB_DATABASE: portus_production
+      PORTUS_DB_PASSWORD: "{{ portus_db_password }}"
+      PORTUS_DB_POOL: 5
+      PORTUS_SECRET_KEY_BASE: "{{ portus_secret_key_base }}"
+      PORTUS_KEY_PATH: /certificates/portus.key
+      PORTUS_PASSWORD: "{{ portus_password }}"
+      PORTUS_BACKGROUND: true
+    image: opensuse/portus:head
+    links:
+      - db
+    name: background
+    volumes:
+      - "{{ portus_home }}/examples/compose/secrets:/certificates:ro"
+
+- name: PORTUS DOCKER | Manage registry
+  docker_container:
+    env:
+      REGISTRY_AUTH_TOKEN_REALM: http://${MACHINE_FQDN}:3000/v2/token
+      REGISTRY_AUTH_TOKEN_SERVICE: ${MACHINE_FQDN}:5000
+      REGISTRY_AUTH_TOKEN_ISSUER: ${MACHINE_FQDN}
+      REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /secrets/portus.crt
+      REGISTRY_NOTIFICATIONS_ENDPOINTS: >
+        - name: portus
+          url: http://${MACHINE_FQDN}:3000/v2/webhooks/events
+          timeout: 2000ms
+          threshold: 5
+          backoff: 1s
+    image: library/registry:2.6
+    links:
+      - portus:portus
+    name: registry
+    ports:
+      - 5000:5000
+      - 5001:5001
+    volumes:
+      - /var/lib/portus/registry:/var/lib/registry
+      - "{{ portus_home }}/examples/compose/secrets:/secrets:ro"
+      - "{{ portus_home }}/examples/compose/registry/config.yml:/etc/docker/registry/config.yml:ro"

@@ -1,0 +1,25 @@
+---
+
+###
+# PORTUS
+###
+
+# Version
+portus_version: 2.4.0
+
+# Sources
+portus_git_repository: https://github.com/SUSE/Portus
+
+# Directory
+portus_home: /opt/Portus
+
+# User
+portus_password: portus
+
+# Database
+portus_db_name: portus_production
+portus_db_password: portus
+
+# Background
+portus_machine_fqdn_value: wikitops.io
+portus_secret_key_base: portus
